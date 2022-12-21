@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<title>ROSARY</title>
+	<link rel="icon" href="src/icon.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/addons/p5.sound.min.js"></script>
+	<script src="https://cdn.socket.io/4.5.4/socket.io.min.js" integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI" crossorigin="anonymous"></script>
+	<script src="sketch.js"></script>
+	<link rel="stylesheet" href="style.css">
+    <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<link href="https://fonts.googleapis.com/earlyaccess/nicomoji.css" rel="stylesheet">
+	<link rel="apple-touch-icon" href="src/icon.png">
+	<style>
+	html, body {
+  margin: 0;
+  padding: 0;
+  touch-action: manipulation;
+  font-family: monospace ;
+  user-select: none
+}
+.wf-nicomoji { font-family: "Nico Moji"; }
+body {
+font-family: 'Nico Moji', sans-serif;
+background:#ADF;
+}
+	body p, body span, body dl, h1, h2, h3, h4, h5, h6{
+	
+	transform: rotate(0.03deg);
+	-moz-transform: rotate(0.03deg);
+	-ms-transform: rotate(0.03deg);
+	-o-transform: rotate(0.03deg);
+	-webkit-transform: rotate(0.03deg);
+}
+*{
+  -webkit-user-select: none;  /* Chrome or Safari */
+  -moz-user-select: none;     /* FireFox */
+  -ms-user-select: none;      /* IE */
+  -o-user-select: none;       /* Opera */
+  user-select: none;
+}
+canvas {
+  display: block;
+  position:fixed !important;
+  top:calc( var(--vh) * 50 ) !important;
+  transform: translateY(-50%) !important;
+  width:100vw;
+  height:100vw;
+}
+.vanish {
+	display:none !important;
+}
+main {
+	position:absolute;
+	z-index:-1;
+	margin:0;
+	padding:0;
+	width:100%;
+	height:calc( var(--vh) * 100 );
+	top:50%;
+	left:50%;
+	transform:translate(-50%,-50%);
+}
+.vanish {
+	display:none !important;
+}
+.bb {
+	background: rgba(0,0,0,0.5);
+	position:fixed;
+	display:block;
+	top:0;
+	left:0;
+	margin:0;
+	padding:0;
+	width:100vw;
+	height:calc( var(--vh) * 100 );
+}
+.modal {
+	background:#FFFFFF;
+	position:fixed;
+	display:block;
+	width:90vw;
+	height:80vw;
+	top:50%;
+	left:50%;
+	border:solid;
+	transform: translate(-50%,-50%);
+}
+.modalbar{
+	margin:0;
+	padding:0;
+	width:100%;
+	height:10vw;
+	display:flex;
+	justify-content:flex-end;
+}
+.closeicon{
+	font-size:10vw;
+	width:10vw;
+	height:10vw;
+}
+.modalcont{
+	margin:0;
+	padding:0;
+	width:90vw;
+	height;30vw;
+	display:flex;
+	justify-content:center;
+	flex-flow: column;
+}
+a:hover{
+	background:#DDDDDD;
+}
+	</style>
+  </head>
+  <body>
+	<div style="border:2px double #00F;box-sizing: border-box;position:absolute;top:calc( (var(--vh) * 50) - 50vw - 30px - 72px );left:1vw;width:98vw;height:68px;background:#DEF;">
+	<div id="conscore" style="position:absolute;left:calc( 49.5vw - 34px );top:32px;border-radius: 3px;transform:translate(-50%,-50%);border:2px double #00F;padding-left:14vw;padding-right:14vw;text-align:center;line-height:50px;height:50px;font-size:26px;background:#FFF;color:#0AF;">SCORE:0pt</div>
+	<div id="time" style="position:absolute;left:calc( 99vw - 68px );top:32px;border-radius: 300px;transform:translateY(-50%);border:2px double #00F;padding:1px;text-align:center;line-height:50px;width:50px;height:50px;font-size:26px;background:#FFF;color:#0AF;">60</div>
+	</div>
+	<div id="bb" class="bb"></div>
+	<div id="modal2" class="modal">
+		<div class="modalbar">
+		</div>
+		<div class="modalcont" style="height:70vw">
+			<div style="width:90vw;height:30vw;display:flex;justify-content:center;">
+				<img id="rimg" src="src/title.png" style="width:80vw;height:20vw;left:15vw;">
+			</div>
+			<div style="width:90vw;height:20vw;display:flex;justify-content:center;">
+			<a style="margin:1vw;margin-left:auto;margin-right:auto;font-size:7vw;text-align:center;height:10vw;background:#ADF;padding-left:14px;padding-right:14px;" id="startb">START</a>
+			</div>
+			<div style="width:90vw;height:20vw;display:flex;justify-content:center;">
+			<a style="margin:1vw;margin-left:auto;margin-right:auto;font-size:7vw;text-align:center;height:10vw;" id="score"></a>
+			</div>
+		</div>
+	</div>
+	<script>
+		function handle(event) {
+			event.preventDefault();
+		}
+		document.addEventListener("dblclick", function(e){ e.preventDefault();}, { passive: false });
+		window.onload = function() {
+		  document.addEventListener('touchmove', handle, { passive: false });
+		  document.addEventListener('mousewheel', handle, { passive: false });
+		}
+		document.documentElement.style.setProperty( '--vh', window.innerHeight/100 + 'px');
+	</script>
+  </body>
+</html>
